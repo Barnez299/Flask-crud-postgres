@@ -1,6 +1,9 @@
 from flask import Flask, render_template
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
+app.secret_key ='superman secret'
+app.config['SQLALCHEMY_DATABASE_URI']
 
 @app.route('/')
 def index():
