@@ -1,14 +1,80 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.secret_key ='superman secret'
-app.config['SQLALCHEMY_DATABASE_URI']
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://xxxxxxxx:*******@localhost:5432/employees'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+db = SQLAlchemy(app)
+
+class Employee(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    email = db.Column(db.String(100), unique=True)
+    phone = db.Column(db.String(100))
+
+    def __init__(self, name, email, phone):
+        self.name = name
+        self.email = email
+        self.phone = phone
+
+    def __repr__(self):
+        return f"Employee('{self.name}', '{self.email}', '{self.phone}')"
 
 
-if __name__=='__main__':
+
+@app.route('/', methods=['GET', 'POST'])
+def Index():
+    employees = Employee.query.all()
+    return render_template('index.html', employees=employees)
+
+
+
+
+@app.route('/add_employee', methods=['GET','POST'])
+def add_employee():
+    if request.method == 'POST':
+
+        name = request.form['name']
+        email = request.form['email']
+        phone = request.form['phone']
+
+        employee = Employee(name, email, phone)
+        db.session.add(employee)
+        db.session.commit()
+        flash('employee successfully added')
+        return redirect(url_for('Index', employee=employee))
+
+
+
+
+@app.route('/update', methods=['GET','POST'])
+def update():
+    if request.method == 'POST':
+        data = Employee.query.get(request.form.get('id'))
+        data.name = request.form['name']
+        data.email = request.form['email']
+        data.phone = request.form['phone']
+
+        db.session.commit()
+        flash("Employee Updated Successfully")
+
+        return redirect(url_for('Index', data=data))
+
+@app.route('/delete/<id>/', methods=['GET'])
+def delete(id):
+    if request.method == 'GET':
+        data = Employee.query.get(id)
+
+        db.session.delete(data)
+        db.session.commit()
+        flash("Employee Deleted Successfully")
+
+        return redirect(url_for('Index', data=data))
+    
+
+
+if __name__== '__main__':
+
     app.run(debug=True)

@@ -1,4 +1,4 @@
-{% extends 'base.html'%} {% include 'header.html'%} {% block title %}Home{% endblock title%} {% block content %}
+{% extends 'base.html' %} {% include 'header.html' %} {% block title %}Home{% endblock title %} {% block content %}
 <div class="container">
     <div class="row">
         <div class="col">
@@ -9,6 +9,20 @@
             <button class="btn btn-success" type="button" name="addemployee" data-toggle="modal" data-target="#mymodal">Add New Employee</button>
             <hr>
         </div>
+    </div>
+    <div>
+        {% with messages = get_flashed_messages() %} {% if messages %} {% for message in messages %}
+
+        <div class="alert alert-success alert-dismissable" role="alert">
+
+            <button type="button" class="close" data-dismiss="alert" aria-label="close">
+                <span aria-hidden="true"><small>x</small></span>
+            </button> {{message}}
+
+        </div>
+
+
+        {% endfor %} {% endif %} {% endwith %}
     </div>
     <div>
         <table class="table table-hover table-dark">
@@ -22,37 +36,38 @@
                 </tr>
             </thead>
             <tbody>
+                {% for employee in employees%}
                 <tr>
-                    <td>1</td>
-                    <td>Mark</td>
-                    <td>@mail</td>
-                    <td>1234567890</td>
+                    <td>{{employee.id}}</td>
+                    <td>{{employee.name}}</td>
+                    <td>{{employee.email}}</td>
+                    <td>{{employee.phone}}</td>
                     <td>
-                        <a href="" class="btn btn-warning btn-xs mr-2" data-toggle="modal" data-target="#modaledit">Edit</a>
-                        <a href="" class="btn btn-danger btn-xs" onclick="return confirm('Do you really want to delete?')">Delete</a>
+                        <a href="/update/{{employee.id}}" class="btn btn-warning btn-xs mr-2" data-toggle="modal" data-target="#modaledit{{employee.id}}">Edit</a>
+                        <a href="/delete/{{employee.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Do you really want to delete?')">Delete</a>
                     </td>
                 </tr>
                 <!-- edit employee modal -->
-                <div class="modal" tabindex="-1" id="modaledit">
+                <div class="modal" tabindex="-1" id="modaledit{{employee.id}}">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title">Edit Employee Details</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form action="" method="POST">
+                                <form action="{{url_for('update')}}" method="POST">
                                     <div class="form-group">
-                                        <label for="name">Name</label>
-                                        <input type="text" class="form-control" name="name" required="1">
+                                        <label>Name</label>
+                                        <input type="hidden" name="id" value="{{employee.id}}">
+                                        <input type="text" class="form-control" name="name" value="{{employee.name}}">
                                     </div>
                                     <div class="form-group">
-                                        <label for="name">Email</label>
-                                        <input type="email" class="form-control" name="email" required="1">
+                                        <label>Email</label>
+                                        <input type="email" class="form-control" name="email" value="{{employee.email}}">
                                     </div>
                                     <div class="form-group">
-                                        <label for="phone">Phone</label>
-                                        <input type="number" class="form-control" name="phone" required="1">
+                                        <label>Phone</label>
+                                        <input type="number" class="form-control" name="phone" value="{{employee.phone}}">
                                     </div>
                                     <div class="form-group">
                                         <button type="submit" class="btn btn-warning">Update Employee</button>
@@ -66,6 +81,7 @@
                     </div>
                 </div>
             </tbody>
+            {% endfor %}
         </table>
     </div>
     <!-- add employee modal -->
@@ -77,7 +93,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="" method="POST">
+                    <form action="{{url_for('add_employee')}}" method="POST">
                         <div class="form-group">
                             <label for="name">Name</label>
                             <input type="text" class="form-control" name="name" required="1">
